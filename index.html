@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive California Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    .legend {
+      background: white;
+      padding: 10px;
+      line-height: 1.5;
+      position: absolute;
+      bottom: 30px;
+      left: 10px;
+      z-index: 1000;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      font-family: Arial, sans-serif;
+    }
+    .legend h4 {
+      margin: 0 0 5px;
+    }
+    .legend ul li {
+      cursor: pointer;
+    }
+    
+    #store-list {
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid #ccc;
+    }
+
+    #stores li {
+    font-size: 12px;
+    margin-bottom: 3px;
+}
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="legend">
+    <h4>Sales Reps</h4>
+    <ul id="county-list" style="margin: 0; padding-left: 20px;"></ul>
+    <!-- changes start here -->
+    <hr>
+     <div id="store-list">
+    <strong>Stores</strong>
+    <ul id="stores" style="margin: 5px 0 0; padding-left: 20px;"></ul>
+  </div>
+    <!-- changes end here -->
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([34.0, -118.25], 7);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Sales Rep Store Mapping
+    const countyCityData = {
+      "Ashley": [
+        { name: "1072 EAST BREA", coords: [33.913576822507615, -117.86933209198807], color: "red" },
+        { name: "1077 LAGUNA NIGUEL", coords: [33.5651243361582, -117.7088963982362], color: "red" },
+        { name: "1840 EL TORO", coords: [33.62111660176546, -117.70552828595495], color: "red" },
+        { name: "603 TUSTIN", coords: [33.725057586962905, -117.79620951659616], color: "red" },
+        { name: "606 SANTA ANA", coords: [33.70042403967786, -117.91639922818199], color: "red" },
+        { name: "0614 MISSION VIEJO", coords: [33.5572789560498, -117.6605783627033], color: "red" },
+        { name: "0615 ORANGE, CA", coords: [33.810881495589335, -117.85632490265937], color: "red" },
+        { name: "647 WESTMINSTER", coords: [33.761579345587286, -118.01278367795058], color: "red" },
+        { name: "6628 LAGUNA HILLS", coords: [33.607050824672015, -117.73049536268005], color: "red" },
+        { name: "6639 GARDEN GROVE", coords: [33.775452586439926, -117.94421464725828], color: "red" },
+        { name: "6643 ANAHEIM HILLS", coords: [33.87179358803766, -117.7499333625559], color: "red" },
+        { name: "6646 HUNTINGTON BEACH (RELO)", coords: [33.716375215144, -118.00504517193889], color: "red" },
+        { name: "6647 ANAHEIM", coords: [33.84980436767102, -117.96008121447724], color: "red" },
+        { name: "6650 CYPRESS", coords: [33.831180413469426, -118.0306561165463], color: "red" },
+        { name: "6657 LA HABRA", coords: [33.92651798437294, -117.93209776253], color: "red" },
+        { name: "6664 COSTA MESA", coords: [33.659361342227896, -117.91644650128409], color: "red" },
+        { name: "6668 LAKE FOREST", coords: [33.67304094500671, -117.66203995924702], color: "red" },
+        { name: "6680 N SANTA ANA", coords: [33.725664297467404, -117.84326296262448], color: "red" },
+        { name: "6893 FULLERTON (RELO)", coords: [33.866033514989255, -117.88625504721558], color: "red" },
+        { name: "6952 STANTON", coords: [33.787163450554694, -117.99431427793854], color: "red" },
+        { name: "6963 HUNTINGTON BEACH", coords: [33.68820883100554, -117.97191543115453], color: "red" },
+        { name: "6965 ORANGE (K)", coords: [33.82025300431857, -117.83328364084515], color: "red" },
+        { name: "8525 EAST IRVINE", coords: [33.69982215404963, -117.74210507830621], color: "red" },
+        { name: "1002 HUNTINGTON PARK", coords: [33.98801529020535, -118.21486761647222], color: "red" },
+        { name: "1005 SAN PEDRO", coords: [33.76540372693476, -118.29494484726281], color: "red" },
+        { name: "1037 PARAMOUNT", coords: [33.8879907253088, -118.1854547472052], color: "red" },
+        { name: "607 INDUSTRY", coords: [33.99606295346994, -117.9076423318113], color: "red" },
+        { name: "2304 MONTEREY PARK (RELO OF 689)", coords: [34.03744933772283, -118.10143473179177], color: "red" },
+        { name: "654 COMMERCE", coords: [33.98758941088737, -118.13413590008378], color: "red" },
+        { name: "6610 ALHAMBRA", coords: [34.085456898920285, -118.14065476245482], color: "red" },
+        { name: "6673 EL MONTE", coords: [34.08858748575981, -118.05428564711045], color: "red" },
+        { name: "6627 DOWNEY", coords: [33.949891266142686, -118.15540683183325], color: "red" },
+        { name: "6684 WHITTIER", coords: [33.96573380850382, -118.04931964716859], color: "red" },
+        { name: "1018 N OCEANSIDE", coords: [33.25102619739772, -117.26559979008394], color: "red" },
+        { name: "1030 EASTLAKE", coords: [32.63339766632425, -116.96980966312806], color: "red" },
+        { name: "1032 IMPERIAL MARKETPLACE", coords: [32.702213922949056, -117.10083491706824], color: "red" },
+        { name: "1034 OTAY MESA", coords: [32.57670098154573, -117.03733916315379], color: "red" },
+        { name: "1053 ESCONDIDO II", coords: [33.13329406534984, -117.06104322750579], color: "red" },
+        { name: "1059 EL CENTRO", coords: [32.77244934781425, -115.54901654772215], color: "red" },
+        { name: "1074 VISTA", coords: [33.14255309084773, -117.24196292603477], color: "red" },
+        { name: "1848 EL CAJON (RELO)", coords: [32.80965340441305, -116.9646671170193], color: "red" },
+        { name: "658 CHULA VISTA", coords: [32.63826802680719, -117.03136967498162], color: "red" },
+        { name: "659 LEMON GROVE", coords: [32.744332747333054, -117.03590621704903], color: "red" },
+        { name: "660 ENCINITAS", coords: [33.06481833650915, -117.26100361690253], color: "red" },
+        { name: "6612 ESCONDIDO", coords: [33.11086628750557, -117.10601850684404], color: "red" },
+        { name: "6634 FAIRMOUNT AVE", coords: [32.78257698195893, -117.10237831703154], color: "red" },
+        { name: "6656 SAN MARCOS", coords: [33.14017898176165, -117.17360091686778], color: "red" },
+        { name: "6679 MIRA MESA", coords: [32.914178502264186, -117.12151174765744], color: "red" },
+        { name: "669 CARMEL MTN", coords: [32.98471756775556, -117.07490724762503], color: "red" },
+        { name: "671 IMPERIAL BEACH", coords: [32.586867060091556, -117.09193074780615], color: "red" },
+        { name: "673 SANTEE", coords: [32.840765420222, -116.98490306303377], color: "red" },
+        { name: "674 SPORTS ARENA", coords: [32.75277315774248, -117.213711532388], color: "red" },
+        { name: "679 OCEANSIDE", coords: [33.186689296879265, -117.2944389004993], color: "red" },
+        { name: "680 GENESEE", coords: [32.822668500351696, -117.1808386323562], color: "red" },
+        { name: "8949 POWAY", coords: [32.93741658858095, -117.03520954764679], color: "red" },
+        { name: "1013 REDLANDS", coords: [34.06895641860174, -117.19786776246262], color: "red" },
+        { name: "1028 TEMECULA", coords: [33.48321163028696, -117.09875736273769], color: "red" },
+        { name: "1084 MIRA LOMA", coords: [33.978646934828596, -117.55596213181961], color: "red" },
+        { name: "1087 MORENO VALLEY II", coords: [33.89036006814374, -117.22751546254703], color: "red" },
+        { name: "1844 NW VICTORVILLE", coords: [34.518993704618616, -117.3251607254785], color: "red" },
+        { name: "601 CORONA", coords: [33.88613809487928, -117.52527692885128], color: "red" },
+        { name: "616 MORENO VALLEY", coords: [33.94442562326635, -117.2623667998806], color: "red" },
+        { name: "6619 RIVERSIDE", coords: [33.936287098742056, -117.40160073183952], color: "red" },
+        { name: "6645 POMONA", coords: [34.02288272379137, -117.74178156248442], color: "red" },
+        { name: "665 VICTORVILLE", coords: [34.473579610872115, -117.33314297925416], color: "red" },
+        { name: "6665 S CORONA", coords: [33.849197689064844, -117.53772804722357], color: "red" },
+        { name: "668 MURRIETA", coords: [33.55702287912745, -117.19761383201755], color: "red" },
+        { name: "6834 APPLE VALLEY ", coords: [34.473563101338364, -117.24436113158396], color: "red" },
+        { name: "6874 INDIO", coords: [33.74282674695952, -116.21284091658775], color: "red" },
+        { name: "6875 PERRIS", coords: [33.749051963788396, -117.19167607876656], color: "red" },
+        { name: "6876 SOUTH CHINO", coords: [33.988864637999484, -117.70407563181473], color: "red" },
+        { name: "6884 ONTARIO (RELO OF 619)", coords: [34.02072065169008, -117.65199273179961], color: "red" },
+        { name: "6971 YUCCA VALLEY", coords: [34.13302545332806, -116.3817927624322], color: "red" },
+        { name: "6972 BARSTOW", coords: [34.8858980964415, -117.05982176207077], color: "red" },
+        { name: "8526 PALM SPRINGS", coords: [33.81895819024046, -116.48970504723768], color: "red" },
+        { name: "8988 LAKE ELSINORE", coords: [33.693084094045055, -117.3409788626396], color: "red" },
+
+        
+
+
+      ],
+      
+      "Sammy": [
+        { name: "684 LA MIRADA", coords: [33.918571623310704, -118.00938233184792], color: "blue" },
+        { name: "6614 LAKEWOOD", coords: [33.84958712172548, -118.13408774722329], color: "blue" },
+        { name: "608 CERRITOS", coords: [33.88600293030173, -118.10097281652035], color: "blue" },
+        { name: "1010 INGLEWOOD", coords: [33.94803163008811, -118.33076812060997], color: "blue" },
+        { name: "1039 HYDE PARK", coords: [33.98831332211711, -118.31137187765711], color: "blue" },
+        { name: "1048 WILSHIRE/UNION", coords: [34.05719985390961, -118.27134866246818], color: "blue" },
+        { name: "1061 LADERA HEIGHTS", coords: [33.98916135392061, -118.3642861318146], color: "blue" },
+        { name: "1062 LONG BEACH", coords: [33.81417579741519, -118.18372767965742], color: "blue" },
+        { name: "1845 COVINA (RELO)", coords: [34.08801263838861, -117.90979073176774], color: "blue" },
+        { name: "1858 SOUTH COMPTON", coords: [33.879910645602685, -118.222181547209], color: "blue" },
+        { name: "611 GARDENA", coords: [33.86863827363018, -118.28651173187139], color: "blue" },
+        { name: "618 TORRANCE", coords: [33.80380067863001, -118.33059673190199], color: "blue" },
+        { name: "620 HAWTHORNE", coords: [33.89899303541844, -118.36908936254288], color: "blue" },
+        { name: "648 SIGNAL HILL", coords: [33.80219451694116, -118.16578906633357], color: "blue" },
+        { name: "6611 MARINA DEL REY", coords: [33.97657642591166, -118.42326933182048], color: "blue" },
+        { name: "6617 GLENDORA", coords: [34.11493085360619, -117.83104469312654], color: "blue" },
+        { name: "6629 MONROVIA", coords: [34.13404622758722, -117.99003954708886], color: "blue" },
+        { name: "6663 BALDWIN PARK", coords: [34.072748412107, -117.95768413177498], color: "blue" },
+        { name: "6670 CARSON", coords: [33.80653852969063, -118.27407971655776], color: "blue" },
+        { name: "6689 CYPRESS PARK", coords: [34.08385548873283, -118.22502431642684], color: "blue" },
+        { name: "6855 W INGLEWOOD", coords: [33.958283865522695, -118.3707652201741], color: "blue" },
+        { name: "8463 WEST COVINA", coords: [34.0367698985473, -117.910760131792], color: "blue" },
+        { name: "1012 CAMARILLO", coords: [34.21773154538042, -119.07786056239185], color: "blue" },
+        { name: "1040 OXNARD (RELO)", coords: [34.235612801188985, -119.17795173899785], color: "blue" },
+        { name: "1055 NEWHALL", coords: [34.44092410501256, -118.57417617762823], color: "blue" },
+        { name: "1070 WEST HILLS", coords: [34.189532061844346, -118.62668256240538], color: "blue" },
+        { name: "6037 PASADENA", coords: [34.14921523517183, -118.09042390105294], color: "blue" },
+        { name: "609 SAN FERNANDO", coords: [34.294511698858244, -118.41876721632667], color: "blue" },
+        { name: "612 CANOGA PARK", coords: [34.218606551495455, -118.5941599930773], color: "blue" },
+        { name: "638 PALMDALE", coords: [34.59987859797142, -118.13540517094927], color: "blue" },
+        { name: "649 GLENDALE", coords: [34.14436043803576, -118.26831669881184], color: "blue" },
+        { name: "653 SANTA CLARITA", coords: [34.42080101532201, -118.49767836314776], color: "blue" },
+        { name: "6613 N HOLLYWOOD", coords: [34.19983336056033, -118.38345873171457], color: "blue" },
+        { name: "6616 SUNSET", coords: [34.0976196096052, -118.31268441642025], color: "blue" },
+        { name: "6623 GOLETA", coords: [34.427677266815664, -119.87062673160585], color: "blue" },
+        { name: "6632 WOODLAND HILLS", coords: [34.18560456611279, -118.59437164160661], color: "blue" },
+        { name: "6638 SANTA MARIA", coords: [34.92211350564331, -120.41926437739599], color: "blue" },
+        { name: "6640 SIMI VALLEY", coords: [34.28134287202822, -118.7863932316758], color: "blue" },
+        { name: "6644 PANORAMA CITY", coords: [34.21417112544997, -118.44616833170781], color: "blue" },
+        { name: "6651 LANCASTER", coords: [34.686378757083745, -118.16445513148145], color: "blue" },
+        { name: "6654 BURBANK", coords: [34.169924293053604, -118.29884413172884], color: "blue" },
+        { name: "6661 VAN NUYS (RELO)", coords: [34.22021721522791, -118.49998621636205], color: "blue" },
+        { name: "6662 THOUSAND OAKS (RELO)", coords: [34.19298546125608, -118.93406347774652], color: "blue" },
+        { name: "6883 EAST PALMDALE", coords: [34.57665143954622, -118.04859877756296], color: "blue" },
+        { name: "1083 NORTH UPLAND", coords: [34.13404735278409, -117.62961025349544], color: "blue" },
+        { name: "1857 SOUTH FONTANA", coords: [34.055385186610685, -117.4380658359088], color: "blue" },
+        { name: "610 S SAN BERNARDINO", coords: [34.06550678056884, -117.27020273320049], color: "blue" },
+        { name: "645 RANCHO CUCAMONGA", coords: [34.10883070189915, -117.54679424710082], color: "blue" },
+        { name: "6683 RIALTO", coords: [34.10613664182342, -117.39971463175917], color: "blue" },
+        { name: "683 SAN BERNARDINO", coords: [34.132742514563056, -117.30676660533423], color: "blue" },
+        { name: "687 UPLAND", coords: [34.092120776527544, -117.66874904620201], color: "blue" },
+        { name: "6960 NORTH FONTANA", coords: [34.138685631552036, -117.45660526403296], color: "blue" },
+        
+
+      ],
+
+    };
+
+    const allMarkers = [];
+
+    function showCities(county) {
+      //clear markers
+      allMarkers.forEach(marker => map.removeLayer(marker));
+      allMarkers.length = 0;
+
+      //clear store list
+      const storeUl = document.getElementById('stores');
+      storeUl.innerHTML = '';
+      
+      const cities = countyCityData[county] || [];
+      if (cities.length === 0) return;
+
+      const group = [];
+
+      cities.forEach(city => {
+
+        // Add store name to list
+        const storeLi = document.createElement('li');
+        storeLi.textContent = city.name;
+        storeUl.appendChild(storeLi);
+
+        //marker icon
+        const icon = L.divIcon({
+          className: '',
+          html: `<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='${city.color}' stroke='black' stroke-width='2'/></svg>`
+        });
+
+        const marker = L.marker(city.coords, { icon })
+          .addTo(map)
+          .bindPopup(`<strong>${city.name}</strong>`);
+
+        allMarkers.push(marker);
+        group.push(marker);
+      });
+
+      const bounds = L.featureGroup(group).getBounds();
+      map.fitBounds(bounds);
+    }
+
+    // Populate county list in legend
+    const countyList = document.getElementById('county-list');
+    Object.keys(countyCityData).forEach(county => {
+      const li = document.createElement('li');
+      li.textContent = county;
+      li.addEventListener('click', () => showCities(county));
+      countyList.appendChild(li);
+    });
+
+    // Load county boundaries
+    fetch('https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/california-counties.geojson')
+      .then(res => res.json())
+      .then(data => {
+        const geojsonLayer = L.geoJSON(data, {
+          style: {
+            color: '#444',
+            weight: 1,
+            fillColor: '#66b3ff',
+            fillOpacity: 0.4
+          },
+          onEachFeature: function (feature, layer) {
+            layer.on({
+              click: function (e) {
+                map.fitBounds(e.target.getBounds());
+              }
+            });
+            layer.bindPopup(`<strong>${feature.properties.name}</strong>`);
+          }
+        }).addTo(map);
+      });
+  </script>
+</body>
+</html>
